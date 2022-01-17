@@ -7,21 +7,22 @@ interface UserInfo {
 
 export const useUser = () => {
   const [data, setData] = useState<UserInfo>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    fetch('http://localhost:8000/user/info')
+    setLoading(true);
+    fetch('http://localhost:8000/user/info', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         setData(data);
-        setIsLoading(false);
       })
       .catch((e) => {
         console.log(e);
-        setIsLoading(false);
-      });
+        setError(e);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  return { data, isLoading };
+  return { data, loading, error };
 };

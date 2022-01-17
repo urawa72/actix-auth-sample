@@ -1,10 +1,14 @@
 import { useUser } from './hooks';
 
 const User = () => {
-  const { data, isLoading } = useUser();
+  const { data, loading, error } = useUser();
 
-  if (isLoading) {
+  if (loading) {
     return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error!!!</p>;
   }
 
   return (

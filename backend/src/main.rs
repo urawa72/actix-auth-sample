@@ -9,8 +9,13 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .supports_credentials()
+            .allowed_origin("http://localhost:4000")
+            .allowed_methods(vec!["GET", "POST", "OPTIONS"])
+            .allowed_headers(vec!["X-CUSTOM-HEADER"]);
         App::new()
-            .wrap(Cors::default().allowed_origin("http://localhost:4000"))
+            .wrap(cors)
             .wrap(Logger::default())
             .service(user::get_info)
     })
