@@ -9,7 +9,8 @@ mod user;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix=info");
+    // std::env::set_var("RUST_LOG", "actix=info");
+    std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
     // Generate a random 32 byte key
@@ -29,8 +30,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .wrap(RedisSession::new("127.0.0.1:6379", &private_key))
             .wrap(Logger::default())
-            .service(user::get_info)
             .service(auth::login)
+            .service(auth::logout)
+            .service(auth::do_something)
     })
     .bind(("127.0.0.1", 8000))?
     .run()

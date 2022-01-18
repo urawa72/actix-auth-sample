@@ -7,8 +7,8 @@ pub struct UserInfo {
     email: String,
 }
 
-#[get("/user/info")]
-pub async fn get_info() -> web::Json<UserInfo> {
+#[get("/users/info")]
+pub async fn get_users_info() -> web::Json<UserInfo> {
     web::Json(UserInfo {
         username: "test".to_string(),
         email: "test@example.com".to_string()
