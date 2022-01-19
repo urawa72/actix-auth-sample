@@ -28,7 +28,11 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
-            .wrap(RedisSession::new("127.0.0.1:6379", &private_key))
+            .wrap(
+                RedisSession::new("127.0.0.1:6379", &private_key)
+                    .cookie_secure(false)
+                    .cookie_name("actix-auth-sample"),
+            )
             .wrap(Logger::default())
             .service(auth::login)
             .service(auth::logout)

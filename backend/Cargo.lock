@@ -36,6 +36,7 @@ dependencies = [
  "actix-session",
  "actix-web",
  "env_logger",
+ "log",
  "rand 0.8.4",
  "rand_chacha 0.3.1",
  "serde",
