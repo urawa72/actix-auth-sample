@@ -12,7 +12,7 @@ export const useUser = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:8000/user/info', { credentials: 'include' })
+    fetch('http://localhost:8000/users/info', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         setData(data);
