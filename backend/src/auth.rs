@@ -1,11 +1,10 @@
 use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Result};
-use log::info;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct IndexResponse {
-    user_id: Option<String>,
+    user_id: String,
     counter: i32,
 }
 
@@ -16,23 +15,24 @@ struct Identity {
 
 #[post("/do_something")]
 async fn do_something(session: Session) -> Result<HttpResponse> {
-    if session.get::<String>("user_id")?.is_none() {
-        return Ok(HttpResponse::Unauthorized().json("Unauthorized"));
-    }
-
     let user_id: Option<String> = session.get::<String>("user_id")?;
-    let counter: i32 = session
-        .get::<i32>("counter")
-        .unwrap_or(Some(0))
-        .map_or(1, |inner| inner + 1);
-    session.set("counter", counter)?;
+    if let Some(user_id) = user_id {
+        let counter: i32 = session
+            .get::<i32>("counter")
+            .unwrap_or(Some(0))
+            .map_or(1, |inner| inner + 1);
+        session.set("counter", counter)?;
 
-    Ok(HttpResponse::Ok().json(IndexResponse { user_id, counter }))
+        Ok(HttpResponse::Ok().json(IndexResponse { user_id, counter }))
+    } else {
+        // 余計なkeyがredisに残らないようにする
+        session.renew();
+        Ok(HttpResponse::Unauthorized().finish())
+    }
 }
 
 #[post("/login")]
 async fn login(identity: web::Json<Identity>, session: Session) -> Result<HttpResponse> {
-    info!("{:?}", identity);
     let id = identity.into_inner().user_id;
     session.set("user_id", &id)?;
     session.renew();
@@ -43,7 +43,7 @@ async fn login(identity: web::Json<Identity>, session: Session) -> Result<HttpRe
         .unwrap_or(0);
 
     Ok(HttpResponse::Ok().json(IndexResponse {
-        user_id: Some(id),
+        user_id: id,
         counter,
     }))
 }
