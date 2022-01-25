@@ -3,6 +3,7 @@ use actix_redis::RedisSession;
 use actix_web::{http::header, middleware::Logger, App, HttpServer};
 
 mod auth;
+mod middleware;
 mod user;
 
 #[actix_web::main]
@@ -21,16 +22,18 @@ async fn main() -> std::io::Result<()> {
             .allowed_header(header::CONTENT_TYPE)
             .supports_credentials();
 
+        // Session settings
+        let session = RedisSession::new("127.0.0.1:6379", &[0u8; 32]) //TODO: use random key from env file
+            .cookie_http_only(true)
+            .cookie_secure(false)
+            // .cookie_same_site(actix_redis::SameSite::None)
+            .cookie_domain("localhost")
+            .cookie_name("actix-auth-sample");
+
         App::new()
             .wrap(cors)
-            .wrap(
-                RedisSession::new("127.0.0.1:6379", &[0u8; 32]) //TODO: use random key from env file
-                    .cookie_http_only(true)
-                    .cookie_secure(false)
-                    // .cookie_same_site(actix_redis::SameSite::None)
-                    .cookie_domain("localhost")
-                    .cookie_name("actix-auth-sample"),
-            )
+            .wrap(session)
+            .wrap(middleware::AuthService)
             .wrap(Logger::default())
             .service(auth::login)
             .service(auth::logout)
