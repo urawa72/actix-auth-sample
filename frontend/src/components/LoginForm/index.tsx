@@ -1,6 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+
+type IndexResponse = {
+  counter: number;
+};
 
 const LoginForm = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [counter, setCounter] = useState(0);
+
   const postLogin = useCallback(() => {
     const method = 'POST';
     const headers = {
@@ -16,7 +23,10 @@ const LoginForm = () => {
       mode: 'cors',
     })
       .then((res) => res.json())
-      .then((json) => console.log(json))
+      .then((json) => {
+        console.log(json);
+        setIsAuthenticated(true);
+      })
       .catch((e) => console.log(e));
     return result;
   }, []);
@@ -33,8 +43,10 @@ const LoginForm = () => {
       credentials: 'include',
       mode: 'cors',
     })
-      .then((res) => res.json())
-      .then((json) => console.log(json))
+      .then((_) => {
+        setIsAuthenticated(false);
+        setCounter(0);
+      })
       .catch((e) => console.log(e));
     return result;
   }, []);
@@ -52,13 +64,18 @@ const LoginForm = () => {
       mode: 'cors',
     })
       .then((res) => res.json())
-      .then((json) => console.log(json))
+      .then((json: IndexResponse) => {
+        console.log(json);
+        setCounter(json.counter);
+      })
       .catch((e) => console.log(e));
     return result;
   }, []);
 
   return (
     <div>
+      <div>{isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</div>
+      <div>{counter}</div>
       <div>
         <input type="text" placeholder="id" />
       </div>
