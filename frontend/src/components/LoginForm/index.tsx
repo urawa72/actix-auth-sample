@@ -15,7 +15,7 @@ const LoginForm = () => {
       'Content-Type': 'application/json',
     };
     const body = JSON.stringify({ user_id: '1' });
-    const result = fetch('http://localhost:8000/login', {
+    const result = fetch('http://api.localhost.test:8000/login', {
       method,
       headers,
       body,
@@ -37,7 +37,7 @@ const LoginForm = () => {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     };
-    const result = fetch('http://localhost:8000/logout', {
+    const result = fetch('http://api.localhost.test:8000/logout', {
       method,
       headers,
       credentials: 'include',
@@ -57,7 +57,7 @@ const LoginForm = () => {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     };
-    const result = fetch('http://localhost:8000/do_something', {
+    const result = fetch('http://api.localhost.test:8000/do_something', {
       method,
       headers,
       credentials: 'include',
