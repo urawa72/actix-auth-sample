@@ -8,18 +8,16 @@ mod user;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // std::env::set_var("RUST_LOG", "actix=info");
     std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
     HttpServer::new(move || {
         // Cors settings
         let cors = Cors::default()
-            .allowed_origin("http://sub.localhost:4000")
-            .allowed_origin("http://localhost:4000")
+            .allowed_origin("http://sub.localhost.test:4000")
             .allowed_methods(vec!["GET", "POST", "OPTIONS"])
-            .allowed_headers(vec![header::ACCEPT])
-            .allowed_header(header::CONTENT_TYPE)
+            .allowed_headers(vec![header::ACCEPT, header::CONTENT_TYPE])
+            .max_age(3600)
             .supports_credentials();
 
         // Session settings
@@ -27,13 +25,13 @@ async fn main() -> std::io::Result<()> {
             .cookie_http_only(true)
             .cookie_secure(false)
             // .cookie_same_site(actix_redis::SameSite::None)
-            .cookie_domain("localhost")
+            .cookie_domain("localhost.test")
             .cookie_name("actix-auth-sample");
 
         App::new()
+            .wrap(middleware::AuthService)
             .wrap(cors)
             .wrap(session)
-            .wrap(middleware::AuthService)
             .wrap(Logger::default())
             .service(auth::login)
             .service(auth::logout)
