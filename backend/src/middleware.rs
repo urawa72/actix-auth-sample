@@ -1,5 +1,9 @@
+use actix_session::{Session, UserSession};
+use actix_web::HttpResponse;
 use futures::future::{ok, Future, Ready};
+use std::cell::RefCell;
 use std::pin::Pin;
+use std::rc::Rc;
 
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::Error;
@@ -21,12 +25,14 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(AuthMiddleware { service })
+        ok(AuthMiddleware {
+            service: Rc::new(RefCell::new(service)),
+        })
     }
 }
 
 pub struct AuthMiddleware<S> {
-    service: S,
+    service: Rc<RefCell<S>>,
 }
 
 impl<S, B> Service for AuthMiddleware<S>
@@ -48,12 +54,26 @@ where
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
-        println!("Hi from middleware. You requested: {}", req.path());
-
-        let fut = self.service.call(req);
+        let mut srv = self.service.clone();
         Box::pin(async move {
-            let res = fut.await?;
-            Ok(res)
+            let path = req.path().to_string();
+            if path.find("/login").is_none()
+                && get_user_id_from_session(&req.get_session()).is_none()
+            {
+                // 余計なkeyがredisに残らないようにする
+                req.get_session().renew();
+                return Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()));
+            }
+
+            let res = srv.call(req);
+            res.await
         })
+    }
+}
+
+fn get_user_id_from_session(session: &Session) -> Option<String> {
+    match session.get::<String>("user_id") {
+        Ok(user_id) => user_id,
+        _ => return None,
     }
 }

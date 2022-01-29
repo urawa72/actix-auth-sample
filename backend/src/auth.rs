@@ -14,20 +14,13 @@ struct Identity {
 
 #[post("/do_something")]
 async fn do_something(session: Session) -> Result<HttpResponse> {
-    let user_id: Option<String> = session.get::<String>("user_id")?;
-    if let Some(_) = user_id {
-        let counter: i32 = session
-            .get::<i32>("counter")
-            .unwrap_or(Some(0))
-            .map_or(1, |inner| inner + 1);
-        session.set("counter", counter)?;
+    let counter: i32 = session
+        .get::<i32>("counter")
+        .unwrap_or(Some(0))
+        .map_or(1, |inner| inner + 1);
+    session.set("counter", counter)?;
 
-        Ok(HttpResponse::Ok().json(IndexResponse { counter }))
-    } else {
-        // 余計なkeyがredisに残らないようにする
-        session.renew();
-        Ok(HttpResponse::Unauthorized().finish())
-    }
+    Ok(HttpResponse::Ok().json(IndexResponse { counter }))
 }
 
 #[post("/login")]
@@ -41,9 +34,7 @@ async fn login(identity: web::Json<Identity>, session: Session) -> Result<HttpRe
         .unwrap_or(Some(0))
         .unwrap_or(0);
 
-    Ok(HttpResponse::Ok().json(IndexResponse {
-        counter,
-    }))
+    Ok(HttpResponse::Ok().json(IndexResponse { counter }))
 }
 
 #[post("/logout")]

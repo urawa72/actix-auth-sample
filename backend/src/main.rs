@@ -4,7 +4,6 @@ use actix_web::{http::header, middleware::Logger, App, HttpServer};
 
 mod auth;
 mod middleware;
-mod user;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -17,7 +16,7 @@ async fn main() -> std::io::Result<()> {
             .allowed_origin("http://sub.localhost.test:4000")
             .allowed_methods(vec!["GET", "POST", "OPTIONS"])
             .allowed_headers(vec![header::ACCEPT, header::CONTENT_TYPE])
-            .max_age(3600)
+            .max_age(60)
             .supports_credentials();
 
         // Session settings
@@ -36,7 +35,6 @@ async fn main() -> std::io::Result<()> {
             .service(auth::login)
             .service(auth::logout)
             .service(auth::do_something)
-            .service(user::get_users_info)
     })
     .bind(("127.0.0.1", 8000))?
     .run()
