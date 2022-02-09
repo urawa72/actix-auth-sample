@@ -1,6 +1,9 @@
+use crate::auth::Role;
 use actix_cors::Cors;
 use actix_redis::RedisSession;
+use actix_web::dev::ServiceRequest;
 use actix_web::{http::header, middleware::Logger, App, HttpServer};
+use actix_web_grants::GrantsMiddleware;
 
 mod auth;
 mod middleware;
@@ -27,10 +30,12 @@ async fn main() -> std::io::Result<()> {
             .cookie_domain("localhost.test")
             .cookie_name("actix-auth-sample");
 
+        let authz = GrantsMiddleware::with_extractor(extract);
         App::new()
+            .wrap(authz)
             .wrap(middleware::AuthService)
-            .wrap(cors)
             .wrap(session)
+            .wrap(cors)
             .wrap(Logger::default())
             .service(auth::login)
             .service(auth::logout)
@@ -39,4 +44,16 @@ async fn main() -> std::io::Result<()> {
     .bind(("127.0.0.1", 8000))?
     .run()
     .await
+}
+
+// async fn extract(_req: &mut ServiceRequest) -> Result<Vec<Role>, actix_web::Error> {
+//     Ok(vec![Role::ADMIN])
+// }
+
+async fn extract(_req: &mut ServiceRequest) -> Result<Vec<String>, actix_web::Error> {
+    Ok(vec![
+        "Read".to_string(),
+        "Hoge".to_string(),
+        "Piyo".to_string(),
+    ])
 }

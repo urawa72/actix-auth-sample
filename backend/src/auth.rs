@@ -1,5 +1,6 @@
 use actix_session::Session;
 use actix_web::{post, web, HttpResponse, Result};
+use actix_web_grants::proc_macro::{has_any_role, has_any_permission};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -13,6 +14,8 @@ struct Identity {
 }
 
 #[post("/do_something")]
+// #[has_any_role("Role::ADMIN", type = "Role")]
+#[has_any_permission("Write")]
 async fn do_something(session: Session) -> Result<HttpResponse> {
     let counter: i32 = session
         .get::<i32>("counter")
@@ -46,4 +49,10 @@ async fn logout(session: Session) -> Result<HttpResponse> {
     } else {
         Ok("Could not log out anonymous user".into())
     }
+}
+
+#[derive(PartialEq, Clone)]
+pub enum Role {
+    ADMIN,
+    SALES,
 }
