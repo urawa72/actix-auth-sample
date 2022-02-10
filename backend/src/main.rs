@@ -13,8 +13,9 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
+    println!("Listening on: 127.0.0.1:8000");
+
     HttpServer::new(move || {
-        // Cors settings
         let cors = Cors::default()
             .allowed_origin("http://sub.localhost.test:4000")
             .allowed_methods(vec!["GET", "POST", "OPTIONS"])
@@ -22,11 +23,9 @@ async fn main() -> std::io::Result<()> {
             .max_age(60)
             .supports_credentials();
 
-        // Session settings
-        let session = RedisSession::new("127.0.0.1:6379", &[0u8; 32]) //TODO: use random key from env file
+        let session = RedisSession::new("127.0.0.1:6379", &[0u8; 32]) // TODO: use random key from env file
             .cookie_http_only(true)
-            .cookie_secure(false)
-            // .cookie_same_site(actix_redis::SameSite::None)
+            .cookie_secure(false) // only for local
             .cookie_domain("localhost.test")
             .cookie_name("actix-auth-sample");
 
@@ -45,10 +44,6 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-
-// async fn extract(_req: &mut ServiceRequest) -> Result<Vec<Role>, actix_web::Error> {
-//     Ok(vec![Role::ADMIN])
-// }
 
 async fn extract(_req: &mut ServiceRequest) -> Result<Vec<String>, actix_web::Error> {
     Ok(vec![
