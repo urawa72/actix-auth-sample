@@ -53,7 +53,7 @@ async fn main() -> std::io::Result<()> {
 async fn extract(_req: &mut ServiceRequest) -> Result<Vec<String>, actix_web::Error> {
     Ok(vec![
         "Read".to_string(),
-        "Hoge".to_string(),
+        "Write".to_string(),
         "Piyo".to_string(),
     ])
 }
