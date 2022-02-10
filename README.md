@@ -1,13 +1,30 @@
 # actix-auth-sample
 
+actix-web authentication and authorization sample app.
+
 ## backend
 
-- Create backend API
-  - `cargo new backend`
-- Edit `Cargo.toml` for actix_web and actix_cors
-  - see: https://github.com/actix/examples/tree/master/security/web-cors
+```
+$ cargo run
+Listening on: 127.0.0.1:8000
+```
 
 ## frontend
 
-- Create frontend App
-  - `yarn create next-app --typescript`
+```
+$ yarn install
+$ yarn dev
+```
+
+## test with sub domain
+
+Edit the /etc/hosts as below.
+
+```
+127.0.0.1       sub.localhost.test
+127.0.0.1       api.localhost.test
+127.0.0.1       localhost
+```
+
+You can access the frontend app with `sub.localhost.test:4000`.
+You can access the backend app with `api.localhost.test:8000`.
