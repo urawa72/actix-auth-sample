@@ -1,4 +1,3 @@
-use crate::auth::Role;
 use actix_cors::Cors;
 use actix_redis::RedisSession;
 use actix_web::dev::ServiceRequest;
@@ -18,7 +17,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin("http://sub.localhost.test:4000")
-            .allowed_methods(vec!["GET", "POST", "OPTIONS"])
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
             .allowed_headers(vec![header::ACCEPT, header::CONTENT_TYPE])
             .max_age(60)
             .supports_credentials();
@@ -29,9 +28,8 @@ async fn main() -> std::io::Result<()> {
             .cookie_domain("localhost.test")
             .cookie_name("actix-auth-sample");
 
-        let authz = GrantsMiddleware::with_extractor(extract);
         App::new()
-            .wrap(authz)
+            .wrap(GrantsMiddleware::with_extractor(extract))
             .wrap(middleware::AuthService)
             .wrap(session)
             .wrap(cors)
